@@ -1,0 +1,23 @@
+.skeleton-card{ display: flex; flex-direction: column; overflow: hidden; }
+.skeleton-media{ aspect-ratio: 16/10; }
+.skeleton-body{ padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.skeleton-line{ height: 12px; border-radius: 6px; }
+.skeleton-line.short{ height: 9px; }
+
+.skeleton-card.featured{ flex-direction: row; }
+.skeleton-card.featured .skeleton-media{ flex: 1.1; aspect-ratio: auto; }
+.skeleton-card.featured .skeleton-body{ flex: 1; padding: 24px; }
+
+@media (max-width: 720px){
+  .skeleton-card.featured{ flex-direction: column; }
+}
+
+.shimmer{
+  background: linear-gradient(100deg, var(--border) 30%, rgba(255,255,255,0.16) 50%, var(--border) 70%);
+  background-size: 200% 100%;
+  animation: shimmer-move 1.5s ease-in-out infinite;
+}
+@keyframes shimmer-move{
+  0%{ background-position: 200% 0; }
+  100%{ background-position: -200% 0; }
+}

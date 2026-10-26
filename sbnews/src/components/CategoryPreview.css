@@ -1,0 +1,18 @@
+.category-preview{ margin: 56px auto; }
+.category-preview-head{
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 20px;
+}
+.category-preview-head h2{ text-transform: capitalize; font-size: 1.4rem; display: flex; align-items: center; gap: 10px; }
+.category-dot{ width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.category-preview-head a{ color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+.category-preview-grid{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 980px){ .category-preview-grid{ grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px){ .category-preview-grid{ grid-template-columns: 1fr; } }

@@ -1,0 +1,18 @@
+.dashboard-page{ padding-top: 40px; padding-bottom: 60px; min-height: 60vh; }
+.dashboard-page h1{ font-size: 2rem; }
+.dashboard-sub{ color: var(--text-dim); margin-top: 8px; margin-bottom: 32px; }
+
+.dashboard-grid{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+.dashboard-grid .chart-card:first-child{ grid-column: 1 / -1; }
+
+@media (max-width: 900px){
+  .dashboard-grid{ grid-template-columns: 1fr; }
+}
+
+.chart-card{ padding: 24px; }
+.chart-card h3{ font-size: 1rem; margin-bottom: 16px; }
+.chart-loading{ color: var(--text-faint); font-size: 0.85rem; padding: 40px 0; text-align: center; }

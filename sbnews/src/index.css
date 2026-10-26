@@ -1,0 +1,56 @@
+@import './styles/theme.css';
+
+.Toastify__toast{
+  font-family: var(--font-body);
+  border-radius: var(--radius-sm) !important;
+}
+
+/* Shared visual polish: calm surfaces, consistent controls, and predictable hover feedback. */
+body{
+  line-height: 1.55;
+  background-image: radial-gradient(ellipse at 50% -30%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 58%);
+}
+
+.glass-panel{
+  border-radius: var(--radius-md);
+}
+
+button:not(:disabled){
+  transition: color .18s ease, background-color .18s ease, border-color .18s ease,
+    box-shadow .18s ease, transform .18s ease, opacity .18s ease;
+}
+
+button:hover:not(:disabled){
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled){
+  transform: translateY(0);
+}
+
+input, select{
+  font: inherit;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus{
+  outline: none;
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.category-preview-head a,
+.footer-grid a,
+.auth-switch a{
+  transition: color .18s ease;
+}
+
+.category-preview-head a:hover,
+.footer-grid a:hover,
+.auth-switch a:hover{
+  color: var(--accent);
+}
+
+@media (max-width: 640px){
+  .container{ padding-left: 18px; padding-right: 18px; }
+}

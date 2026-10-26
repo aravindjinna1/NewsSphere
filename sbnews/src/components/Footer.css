@@ -1,0 +1,48 @@
+.site-footer{
+  border-top: 1px solid var(--border);
+  margin-top: 60px;
+  padding-top: 48px;
+  background: var(--bg-elevated);
+}
+.footer-grid{
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 32px;
+  padding-bottom: 32px;
+}
+.footer-brand{ font-size: 1.3rem; margin-bottom: 10px; }
+.footer-tagline{ color: var(--text-dim); font-size: 0.9rem; max-width: 320px; }
+.footer-subscribe-label{ color: var(--text-dim); font-size: 0.8rem; margin-top: 16px; }
+.footer-subscribe{ display: flex; gap: 8px; margin-top: 8px; max-width: 360px; }
+.footer-subscribe input{
+  flex: 1;
+  min-width: 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+}
+
+.footer-subscribe .cta-btn{ padding: 9px 16px; }
+.footer-grid h4{ margin-bottom: 14px; }
+.footer-grid ul{ list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.footer-grid a{ color: var(--text-dim); font-size: 0.9rem; text-transform: capitalize; }
+.footer-grid a:hover{ color: var(--accent); }
+
+.footer-bottom{
+  border-top: 1px solid var(--border);
+  padding: 18px 24px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+}
+
+@media (max-width: 700px){
+  .footer-grid{ grid-template-columns: 1fr; }
+}

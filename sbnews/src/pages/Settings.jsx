@@ -164,7 +164,7 @@ export default function Settings() {
           <details>
             <summary>Privacy Policy</summary>
             <p className="profile-hint">
-              SB News is a front-end demo. Account, favorites and settings data stay in your
+               News Sphere is a front-end demo. Account, favorites and settings data stay in your
               browser's local storage and are never sent to a server.
             </p>
           </details>

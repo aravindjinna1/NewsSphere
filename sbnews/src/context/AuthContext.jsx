@@ -14,6 +14,7 @@ import { toast } from 'react-toastify'
 import { validatePassword } from '../utils/passwordValidation.js'
 import { auth, googleProvider } from '../firebase.js'
 
+
 const AuthContext = createContext(null)
 const profileKey = (uid) => `sbnews-profile-${uid}`
 const usernameFrom = (name, email) => (name || email?.split('@')[0] || 'user').toLowerCase().replace(/[^a-z0-9]+/g, '') || 'user'
@@ -25,6 +26,7 @@ const toUser = (firebaseUser) => {
   if (!firebaseUser) return null
   const extras = getProfileExtras(firebaseUser.uid)
   const name = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User'
+  
   return {
     uid: firebaseUser.uid,
     name,
@@ -129,6 +131,7 @@ export const AuthProvider = ({ children }) => {
       toast.error('This account does not use an email and password sign-in.')
       return false
     }
+
     try {
       const credential = EmailAuthProvider.credential(firebaseUser.email, currentPassword)
       await reauthenticateWithCredential(firebaseUser, credential)
@@ -141,6 +144,7 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  
   return (
     <AuthContext.Provider value={{ user, authLoading, signup, login, loginWithGoogle, logout, updateProfile, changePassword, isAuthenticated: !!user }}>
       {children}

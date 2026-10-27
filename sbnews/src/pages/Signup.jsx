@@ -26,7 +26,7 @@ export default function Signup() {
     <div className="container auth-page">
       <form className="auth-card glass-panel" onSubmit={handleSubmit}>
         <span className="mono-tag">Create account</span>
-        <h1>Join SB News</h1>
+        <h1>Join News Sphere</h1>
         <p className="auth-sub">Create your account and make your news feed your own.</p>
         <button className="google-btn" type="button" onClick={handleGoogle} disabled={busy}><FcGoogle aria-hidden="true" /> Sign up with Google</button>
         <div className="auth-divider"><span>or sign up with email</span></div>

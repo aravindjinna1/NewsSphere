@@ -18,7 +18,7 @@ export default function Footer() {
     <footer className="site-footer">
       <div className="container footer-grid">
         <div>
-          <div className="brand-text footer-brand">SB<em>News</em></div>
+          <div className="brand-text footer-brand">News<em>Sphere</em></div>
           <p className="footer-tagline">Signal in the noise — live headlines, sorted by what matters.</p>
           <p className="footer-subscribe-label">Get our daily email newsletter of top stories:</p>
           <form className="footer-subscribe" onSubmit={handleSubscribe}>
@@ -55,8 +55,8 @@ export default function Footer() {
         </div>
       </div>
       <div className="container footer-bottom">
-        <p>SB News — built with React + Vite. Headlines via NewsAPI.</p>
-        <p>&copy; {new Date().getFullYear()} SB News. All rights reserved.</p>
+        <p>News Sphere — built with React + Vite. Headlines via NewsAPI.</p>
+        <p>&copy; {new Date().getFullYear()} News Sphere. All rights reserved.</p>
       </div>
     </footer>
   )

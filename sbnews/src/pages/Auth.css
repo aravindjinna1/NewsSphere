@@ -16,6 +16,11 @@
 }
 .auth-card h1{ font-size: 1.6rem; margin: 6px 0 4px; }
 .auth-sub{ color: var(--text-dim); font-size: 0.85rem; margin-bottom: 16px; }
+.google-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:11px 14px;margin-top:8px;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);background:var(--bg);font-size:.92rem;font-weight:600;cursor:pointer;transition:border-color .2s,transform .2s}
+.google-btn svg{font-size:1.2rem}.google-btn:hover{border-color:var(--accent);transform:translateY(-1px)}
+.google-btn:disabled,.cta-btn:disabled{opacity:.65;cursor:wait}
+.auth-divider{display:flex;align-items:center;gap:12px;color:var(--text-faint);font-size:.73rem;margin:10px 0 2px}
+.auth-divider::before,.auth-divider::after{content:"";height:1px;flex:1;background:var(--border)}
 
 .auth-card label{ font-size: 0.8rem; color: var(--text-dim); margin-top: 10px; }
 .auth-card input, .auth-card select{

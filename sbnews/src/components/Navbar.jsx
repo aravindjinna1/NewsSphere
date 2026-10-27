@@ -53,7 +53,7 @@ export default function Navbar() {
       <div className="nav-top container">
         <Link to="/" className="logo" onClick={() => setMenuOpen(false)}>
           <span className="" />
-          <span className="">SB<em>News</em></span>
+          <span className="">News<em>Sphere</em></span> 
         </Link>
 
         <form className="nav-search" onSubmit={submitSearch}>

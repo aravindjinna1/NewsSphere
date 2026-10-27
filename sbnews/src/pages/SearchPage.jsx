@@ -38,6 +38,8 @@ export default function SearchPage() {
       setError(res.error)
       setLoading(false)
     })
+
+    
     return () => { active = false }
   }, [query, tokenStack]) // eslint-disable-line react-hooks/exhaustive-deps
 

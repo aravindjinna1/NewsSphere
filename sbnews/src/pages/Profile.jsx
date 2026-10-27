@@ -31,10 +31,9 @@ export default function Profile() {
     reader.readAsDataURL(file)
   }
 
-  const saveEdit = (e) => {
+  const saveEdit = async (e) => {
     e.preventDefault()
-    updateProfile({ name: form.name, username: form.username, photo: form.photo })
-    setEditing(false)
+    if (await updateProfile({ name: form.name, username: form.username, photo: form.photo })) setEditing(false)
   }
 
   return (

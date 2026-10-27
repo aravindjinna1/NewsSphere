@@ -21,7 +21,7 @@ export default function Settings() {
   const { subscriptions, toggleSubscription } = useSubscriptions()
   const [pwForm, setPwForm] = useState({ current: '', next: '', confirm: '' })
 
-  const handlePasswordSubmit = (e) => {
+  const handlePasswordSubmit = async (e) => {
     e.preventDefault()
     const passwordError = validatePassword(pwForm.next)
     if (passwordError) {
@@ -32,7 +32,7 @@ export default function Settings() {
       toast.error('New passwords do not match.')
       return
     }
-    const ok = changePassword({ currentPassword: pwForm.current, newPassword: pwForm.next })
+    const ok = await changePassword({ currentPassword: pwForm.current, newPassword: pwForm.next })
     if (ok) setPwForm({ current: '', next: '', confirm: '' })
   }
 
@@ -51,7 +51,7 @@ export default function Settings() {
           <h3>Account</h3>
           <p className="profile-hint">Signed in as {user?.email}.</p>
 
-          <form onSubmit={handlePasswordSubmit} className="profile-form">
+          {user?.provider === 'password' ? <form onSubmit={handlePasswordSubmit} className="profile-form">
             <label>Current password</label>
             <PasswordField
               required
@@ -80,7 +80,7 @@ export default function Settings() {
             />
 
             <button className="cta-btn" type="submit">Change password</button>
-          </form>
+          </form> : <p className="profile-hint">Your account uses Google sign-in to manage your password.</p>}
 
           <button className="danger-btn" onClick={logout}>Logout</button>
         </section>

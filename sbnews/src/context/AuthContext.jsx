@@ -1,126 +1,148 @@
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, useContext, useEffect, useState } from 'react'
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+  updateProfile as updateFirebaseProfile,
+  updatePassword as updateFirebasePassword
+} from 'firebase/auth'
 import { toast } from 'react-toastify'
 import { validatePassword } from '../utils/passwordValidation.js'
+import { auth, googleProvider } from '../firebase.js'
 
-const AuthContext = createContext()
-
-// NOTE: This is a front-end-only demo auth flow (no backend / no server
-// verification). It persists a small user table in localStorage so the
-// Login / Signup / Profile / Settings pages have something real to work
-// against. Swap this out for a real auth API when one is available.
-
-const readUsers = () => JSON.parse(localStorage.getItem('sbnews-users') || '[]')
-const writeUsers = (users) => localStorage.setItem('sbnews-users', JSON.stringify(users))
-
-// Derives a simple @username from the display name (falling back to the
-// email) since the signup form only collects a name — keeps the existing
-// signup UI untouched while still giving Profile a username to show/edit.
-const deriveUsername = (name, email) => {
-  const base = (name || email?.split('@')[0] || 'user').toLowerCase().replace(/[^a-z0-9]+/g, '')
-  return base || 'user'
+const AuthContext = createContext(null)
+const profileKey = (uid) => `sbnews-profile-${uid}`
+const usernameFrom = (name, email) => (name || email?.split('@')[0] || 'user').toLowerCase().replace(/[^a-z0-9]+/g, '') || 'user'
+const getProfileExtras = (uid) => {
+  try { return JSON.parse(localStorage.getItem(profileKey(uid)) || '{}') } catch { return {} }
 }
 
-// Only the fields that are safe to keep in the active session / shown in
-// the UI — never persists the password into `sbnews-session`.
-const publicFields = (u) => ({
-  name: u.name,
-  email: u.email,
-  country: u.country,
-  avatar: u.avatar,
-  username: u.username || deriveUsername(u.name, u.email),
-  photo: u.photo || null,
-  joinedAt: u.joinedAt || null
-})
+const toUser = (firebaseUser) => {
+  if (!firebaseUser) return null
+  const extras = getProfileExtras(firebaseUser.uid)
+  const name = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User'
+  return {
+    uid: firebaseUser.uid,
+    name,
+    email: firebaseUser.email,
+    country: extras.country || 'us',
+    avatar: name[0]?.toUpperCase() || 'U',
+    username: extras.username || usernameFrom(name, firebaseUser.email),
+    photo: extras.photo ?? firebaseUser.photoURL ?? null,
+    joinedAt: firebaseUser.metadata.creationTime || null,
+    provider: firebaseUser.providerData.some((item) => item.providerId === 'google.com') ? 'google' : 'password'
+  }
+}
+
+const readableAuthError = (error) => {
+  const messages = {
+    'auth/email-already-in-use': 'An account with that email already exists. Try signing in.',
+    'auth/invalid-credential': 'Email or password is incorrect.',
+    'auth/user-not-found': 'No account was found for that email.',
+    'auth/wrong-password': 'Email or password is incorrect.',
+    'auth/weak-password': 'Choose a stronger password.',
+    'auth/popup-closed-by-user': 'Google sign-in was cancelled.',
+    'auth/popup-blocked': 'Your browser blocked the sign-in window. Allow popups and try again.',
+    'auth/account-exists-with-different-credential': 'An account already exists with this email. Sign in using its original method.',
+    'auth/operation-not-allowed': 'This sign-in method is not enabled in Firebase Console.',
+    'auth/unauthorized-domain': 'Add this site’s domain to Firebase Authentication authorized domains.'
+  }
+  return messages[error?.code] || error?.message || 'Authentication failed. Please try again.'
+}
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('sbnews-session')
-    return saved ? JSON.parse(saved) : null
-  })
+  const [user, setUser] = useState(null)
+  const [authLoading, setAuthLoading] = useState(true)
 
-  const persistSession = (u) => {
-    setUser(u)
-    if (u) localStorage.setItem('sbnews-session', JSON.stringify(u))
-    else localStorage.removeItem('sbnews-session')
+  useEffect(() => onAuthStateChanged(auth, (firebaseUser) => {
+    setUser(toUser(firebaseUser))
+    setAuthLoading(false)
+  }), [])
+
+  const runAuth = async (action, successMessage) => {
+    try {
+      const result = await action()
+      if (successMessage) toast.success(successMessage)
+      return result
+    } catch (error) {
+      toast.error(readableAuthError(error))
+      return null
+    }
   }
 
-  const signup = ({ name, email, password, country }) => {
+  const signup = async ({ name, email, password, country }) => {
     const passwordError = validatePassword(password)
-    if (passwordError) {
-      toast.error(passwordError)
+    if (passwordError) { toast.error(passwordError); return false }
+    const credential = await runAuth(() => createUserWithEmailAndPassword(auth, email.trim(), password))
+    if (!credential) return false
+    try {
+      await updateFirebaseProfile(credential.user, { displayName: name.trim() })
+      localStorage.setItem(profileKey(credential.user.uid), JSON.stringify({ country: country || 'us' }))
+      setUser(toUser(credential.user))
+    } catch (error) {
+      toast.error(readableAuthError(error))
       return false
     }
-    const users = readUsers()
-    if (users.some((u) => u.email === email)) {
-      toast.error('An account with that email already exists.')
-      return false
-    }
-    const newUser = {
-      name,
-      email,
-      password,
-      country: country || 'us',
-      avatar: name?.[0]?.toUpperCase() || 'U',
-      username: deriveUsername(name, email),
-      photo: null,
-      joinedAt: new Date().toISOString()
-    }
-    writeUsers([...users, newUser])
-    persistSession(publicFields(newUser))
     toast.success('Account created successfully!')
     return true
   }
 
-  const login = ({ email, password }) => {
-    const users = readUsers()
-    const found = users.find((u) => u.email === email && u.password === password)
-    if (!found) {
-      toast.error('Invalid email or password.')
+  const login = async ({ email, password }) => {
+    const credential = await runAuth(() => signInWithEmailAndPassword(auth, email.trim(), password), 'Welcome back!')
+    return !!credential
+  }
+
+  const loginWithGoogle = async () => {
+    const credential = await runAuth(() => signInWithPopup(auth, googleProvider), 'Signed in with Google!')
+    return !!credential
+  }
+
+  const logout = async () => {
+    await runAuth(() => signOut(auth), 'Logged out successfully.')
+  }
+
+  const updateProfile = async (updates) => {
+    const firebaseUser = auth.currentUser
+    if (!firebaseUser) return false
+    try {
+      await updateFirebaseProfile(firebaseUser, { displayName: updates.name })
+      const extras = { ...getProfileExtras(firebaseUser.uid), username: updates.username, photo: updates.photo }
+      localStorage.setItem(profileKey(firebaseUser.uid), JSON.stringify(extras))
+      setUser(toUser(firebaseUser))
+      toast.success('Profile updated successfully.')
+      return true
+    } catch (error) {
+      toast.error(readableAuthError(error))
       return false
     }
-    persistSession(publicFields(found))
-    toast.success('Welcome back!')
-    return true
   }
 
-  const logout = () => {
-    persistSession(null)
-    toast.info('Logged out successfully.')
-  }
-
-  // updates can include name, username, photo (avatar image as a data URL)
-  const updateProfile = (updates) => {
-    const users = readUsers()
-    const idx = users.findIndex((u) => u.email === user.email)
-    const merged = { ...user, ...updates }
-    if (idx > -1) {
-      users[idx] = { ...users[idx], ...updates }
-      writeUsers(users)
-    }
-    persistSession(merged)
-    toast.success('Profile updated successfully.')
-  }
-
-  const changePassword = ({ currentPassword, newPassword }) => {
+  const changePassword = async ({ currentPassword, newPassword }) => {
     const passwordError = validatePassword(newPassword)
-    if (passwordError) {
-      toast.error(passwordError)
+    if (passwordError) { toast.error(passwordError); return false }
+    const firebaseUser = auth.currentUser
+    if (!firebaseUser?.email || !firebaseUser.providerData.some((item) => item.providerId === 'password')) {
+      toast.error('This account does not use an email and password sign-in.')
       return false
     }
-    const users = readUsers()
-    const idx = users.findIndex((u) => u.email === user?.email)
-    if (idx === -1 || users[idx].password !== currentPassword) {
-      toast.error('Current password is incorrect.')
+    try {
+      const credential = EmailAuthProvider.credential(firebaseUser.email, currentPassword)
+      await reauthenticateWithCredential(firebaseUser, credential)
+      await updateFirebasePassword(firebaseUser, newPassword)
+      toast.success('Password updated successfully.')
+      return true
+    } catch (error) {
+      toast.error(error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' ? 'Current password is incorrect.' : readableAuthError(error))
       return false
     }
-    users[idx] = { ...users[idx], password: newPassword }
-    writeUsers(users)
-    toast.success('Password updated successfully.')
-    return true
   }
 
   return (
-    <AuthContext.Provider value={{ user, signup, login, logout, updateProfile, changePassword, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, authLoading, signup, login, loginWithGoogle, logout, updateProfile, changePassword, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   )
